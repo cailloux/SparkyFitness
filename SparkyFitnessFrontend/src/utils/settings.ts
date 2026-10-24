@@ -17,6 +17,7 @@ export const providerRequirements: Record<string, string[]> = {
   usda: ['app_key'],
   hevy: ['app_key'],
   liftosaur: ['app_key'],
+  garmin_personal: ['app_key'],
   yazio: ['app_id', 'app_key', 'yazio_client_id', 'yazio_client_secret'],
   coros_mcp: [],
 };
@@ -30,6 +31,9 @@ const providerFieldLabels: Record<string, Record<string, string>> = {
   },
   liftosaur: {
     app_key: 'Liftosaur API Key',
+  },
+  garmin_personal: {
+    app_key: 'Personal API Key',
   },
 };
 
@@ -50,6 +54,7 @@ const PROVIDERS_WITHOUT_APP_ID = [
   'free-exercise-db',
   'wger',
   'liftosaur',
+  'garmin_personal',
 ];
 const OAUTH_TOKEN_PROVIDERS = [
   'googlehealth',

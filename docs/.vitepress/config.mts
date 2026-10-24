@@ -188,6 +188,7 @@ export default defineConfig({
             { text: 'Canadian Nutrient File', link: '/features/settings/canadian-nutrient-file' },
             { text: 'Swedish Food Agency', link: '/features/settings/livsmedelsverket' },
             { text: 'Liftosaur', link: '/features/settings/liftosaur' },
+            { text: 'Garmin Personal API', link: '/features/settings/garmin-personal-api' },
             { text: 'Nutrient Display', link: '/features/settings/nutrient-display-settings' },
             { text: 'Login Management', link: '/features/settings/login-management' },
             { text: 'Google Health Connect', link: '/features/settings/google-health' },

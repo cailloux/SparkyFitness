@@ -1,0 +1,9 @@
+{
+  "calendarDate": "2026-10-23",
+  "restingHeartRate": 52,
+  "heartRateValues": [
+    [1792713600000, 58],
+    [1792713720000, null],
+    [1792713840000, 61]
+  ]
+}

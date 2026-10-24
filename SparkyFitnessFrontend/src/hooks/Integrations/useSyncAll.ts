@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   syncHevyData,
   syncLiftosaurData,
+  syncGarminPersonalData,
 } from '@/api/Integrations/integrations';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +36,7 @@ export const useSyncAllMutation = () => {
           ) &&
           (p.provider_type === 'hevy' ||
             p.provider_type === 'liftosaur' ||
+            p.provider_type === 'garmin_personal' ||
             p.provider_type === 'garmin' ||
             p.has_token)
       );
@@ -75,6 +77,12 @@ export const useSyncAllMutation = () => {
               break;
             case 'liftosaur':
               await syncLiftosaurData(false, provider.id);
+              queryClient.invalidateQueries({
+                queryKey: externalProviderKeys.lists(),
+              });
+              break;
+            case 'garmin_personal':
+              await syncGarminPersonalData(provider.id);
               queryClient.invalidateQueries({
                 queryKey: externalProviderKeys.lists(),
               });

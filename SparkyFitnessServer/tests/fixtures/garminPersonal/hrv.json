@@ -1,0 +1,13 @@
+{
+  "hrvSummary": {
+    "calendarDate": "2026-10-23",
+    "lastNightAvg": 48,
+    "lastNight5MinHigh": 71,
+    "baseline": { "balancedLow": 42, "balancedUpper": 58 },
+    "status": "BALANCED"
+  },
+  "hrvReadings": [
+    { "hrvValue": 45, "readingTimeGMT": "2026-10-23T05:00:00.0" },
+    { "hrvValue": 51, "readingTimeGMT": "2026-10-23T05:05:00.0" }
+  ]
+}

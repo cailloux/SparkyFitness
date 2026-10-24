@@ -1,0 +1,30 @@
+{
+  "data": [
+    {
+      "calendarDate": "2026-10-23",
+      "totalSteps": 11234,
+      "totalDistanceMeters": 8765,
+      "highlyActiveSeconds": 1800,
+      "activeSeconds": 5400,
+      "sedentarySeconds": 36000,
+      "totalKilocalories": 2650,
+      "activeKilocalories": 820,
+      "bmrKilocalories": 1830,
+      "restingHeartRate": 52,
+      "averageStressLevel": 31,
+      "maxStressLevel": 88,
+      "bodyBatteryHighestValue": 92,
+      "bodyBatteryLowestValue": 18,
+      "bodyBatteryAtWakeTime": 85,
+      "bodyBatteryChargedValue": 60,
+      "bodyBatteryDrainedValue": 70,
+      "bodyBatteryMostRecentValue": 24,
+      "floorsAscended": 12,
+      "floorsDescended": 11,
+      "moderateIntensityMinutes": 20,
+      "vigorousIntensityMinutes": 15,
+      "averageSpo2": 95,
+      "avgWakingRespirationValue": 14
+    }
+  ]
+}

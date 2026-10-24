@@ -1,0 +1,19 @@
+{
+  "dailyWeightSummaries": [
+    {
+      "summaryDate": "2026-10-23",
+      "allWeightMetrics": [
+        {
+          "calendarDate": "2026-10-23",
+          "weight": 74250,
+          "bmi": 23.4,
+          "bodyFat": 18.2,
+          "bodyWater": 57.1,
+          "boneMass": 3200,
+          "muscleMass": 34100,
+          "sourceType": "INDEX_SCALE"
+        }
+      ]
+    }
+  ]
+}

@@ -1202,6 +1202,36 @@ export const EditProviderForm = ({
           </p>
         </>
       )}
+      {editData.provider_type === 'garmin_personal' && (
+        <>
+          <div>
+            <Label>
+              {t('integrations.garminPersonalApiKey', 'Personal API Key')}
+            </Label>
+            <Input
+              type="password"
+              value={editData.app_key || ''}
+              onChange={(e) =>
+                setEditData((prev) => ({
+                  ...prev,
+                  app_key: e.target.value,
+                }))
+              }
+              placeholder={t(
+                'settings.providerSpecificFields.enterKey',
+                'Enter Key'
+              )}
+              autoComplete="off"
+            />
+          </div>
+          <p className="text-sm text-muted-foreground col-span-2">
+            {t(
+              'integrations.garminPersonalKeyHelp',
+              "Create a personal API key in Garmin's Connect Developer Program (developer.garmin.com/gc-developer-program/personal). The key only reads data; SparkyFitness never writes to Garmin."
+            )}
+          </p>
+        </>
+      )}
       {(editData.provider_type === 'withings' ||
         editData.provider_type === 'garmin' ||
         editData.provider_type === 'fitbit' ||
@@ -1211,7 +1241,8 @@ export const EditProviderForm = ({
         editData.provider_type === 'polar' ||
         editData.provider_type === 'coros_mcp' ||
         editData.provider_type === 'hevy' ||
-        editData.provider_type === 'liftosaur') && (
+        editData.provider_type === 'liftosaur' ||
+        editData.provider_type === 'garmin_personal') && (
         <div>
           <Label htmlFor="edit_sync_frequency">
             {t('settings.editProviderForm.syncFrequency', 'Sync Frequency')}

@@ -6,6 +6,7 @@ import garminService from '../services/garminService.js';
 import fitbitService from '../services/fitbitService.js';
 import corosService from '../services/corosService.js';
 import hevyService from '../integrations/hevy/hevyService.js';
+import garminPersonalService from '../integrations/garminpersonal/garminPersonalService.js';
 import {
   PROVIDER_SYNC_CONFIGS,
   runProviderSync,
@@ -59,6 +60,12 @@ vi.mock('../integrations/hevy/hevyService.js', () => ({
   },
 }));
 
+vi.mock('../integrations/garminpersonal/garminPersonalService.js', () => ({
+  default: {
+    syncGarminPersonalData: vi.fn(),
+  },
+}));
+
 vi.mock('../config/logging.js', () => ({
   log: vi.fn(),
 }));
@@ -75,12 +82,13 @@ describe('providerSyncScheduler', () => {
     }));
   });
 
-  it('contains configurations for all 10 providers', () => {
-    expect(PROVIDER_SYNC_CONFIGS).toHaveLength(10);
+  it('contains configurations for all 11 providers', () => {
+    expect(PROVIDER_SYNC_CONFIGS).toHaveLength(11);
     const providerNames = PROVIDER_SYNC_CONFIGS.map((c) => c.name);
     expect(providerNames).toEqual([
       'Withings',
       'Garmin',
+      'Garmin Personal API',
       'Fitbit',
       'Oura',
       'Strava',
@@ -235,6 +243,31 @@ describe('providerSyncScheduler', () => {
     );
   });
 
+  it('runs the Garmin Personal API sync and leaves last_sync_at to the service', async () => {
+    vi.mocked(externalProviderRepository.getProvidersByType).mockResolvedValue([
+      {
+        id: 'p-gp',
+        user_id: 'u-gp',
+        is_active: true,
+        sync_frequency: 'hourly',
+      },
+    ] as never);
+    const config = PROVIDER_SYNC_CONFIGS.find(
+      (c) => c.name === 'Garmin Personal API'
+    )!;
+
+    await runProviderSync(config);
+
+    expect(garminPersonalService.syncGarminPersonalData).toHaveBeenCalledWith(
+      'u-gp',
+      'scheduled',
+      'p-gp'
+    );
+    expect(
+      externalProviderRepository.updateProviderLastSync
+    ).not.toHaveBeenCalled();
+  });
+
   it('does not update last_sync_at when Garmin has failed phases', async () => {
     vi.mocked(externalProviderRepository.getProvidersByType).mockResolvedValue([
       {
@@ -292,8 +325,8 @@ describe('providerSyncScheduler', () => {
 
   it('registers cron jobs on startup for each configured provider', () => {
     const tasks = startProviderSyncSchedulers();
-    expect(tasks).toHaveLength(10);
-    expect(cron.schedule).toHaveBeenCalledTimes(10);
+    expect(tasks).toHaveLength(11);
+    expect(cron.schedule).toHaveBeenCalledTimes(11);
     expect(cron.schedule).toHaveBeenCalledWith(
       '0 * * * *',
       expect.any(Function),

@@ -1,0 +1,10 @@
+[
+  {
+    "calendarDate": "2026-10-23",
+    "values": { "valueInML": 1750, "goalInML": 2500 }
+  },
+  {
+    "calendarDate": "2026-10-22",
+    "values": { "valueInML": 0, "goalInML": 2500 }
+  }
+]

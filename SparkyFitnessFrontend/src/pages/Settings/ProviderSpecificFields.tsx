@@ -91,6 +91,7 @@ export const ProviderSpecificFields = ({
     'polar',
     'hevy',
     'liftosaur',
+    'garmin_personal',
   ].includes(provider.provider_type || '');
 
   const providerDashboard =
@@ -222,10 +223,12 @@ export const ProviderSpecificFields = ({
                       'settings.providerSpecificFields.liftosaurAPIKey',
                       'Liftosaur API Key'
                     )
-                  : t(
-                      'settings.providerSpecificFields.apiKeyAppKey',
-                      'API Key / App Key'
-                    )}
+                  : provider.provider_type === 'garmin_personal'
+                    ? t('integrations.garminPersonalApiKey', 'Personal API Key')
+                    : t(
+                        'settings.providerSpecificFields.apiKeyAppKey',
+                        'API Key / App Key'
+                      )}
           </Label>
           <Input
             id="new_app_key"
@@ -647,6 +650,15 @@ export const ProviderSpecificFields = ({
           {t(
             'settings.providerSpecificFields.getYourAPIKeyFrom',
             'Get your API Key from Hevy Settings > API Key.'
+          )}
+        </p>
+      )}
+
+      {provider.provider_type === 'garmin_personal' && (
+        <p className="text-sm text-muted-foreground col-span-2">
+          {t(
+            'integrations.garminPersonalKeyHelp',
+            "Create a personal API key in Garmin's Connect Developer Program (developer.garmin.com/gc-developer-program/personal). The key only reads data; SparkyFitness never writes to Garmin."
           )}
         </p>
       )}

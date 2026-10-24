@@ -11,6 +11,7 @@ import stravaService from './stravaService.js';
 import googleHealthService from './googleHealthService.js';
 import hevyService from '../integrations/hevy/hevyService.js';
 import liftosaurService from '../integrations/liftosaur/liftosaurService.js';
+import garminPersonalService from '../integrations/garminpersonal/garminPersonalService.js';
 import { log } from '../config/logging.js';
 import { startProviderSync } from './providerSyncClaim.js';
 
@@ -54,6 +55,19 @@ export const PROVIDER_SYNC_CONFIGS: readonly ProviderSyncConfig[] = [
           `[CRON] Garmin sync completed with failed phases for user ${p.user_id}; last_sync_at not updated: ${failedPhases.join(', ')}`
         );
       }
+    },
+  },
+  {
+    // Hourly like Garmin; skipped while Garmin Connect is active. The service
+    // sets last_sync_at only when every phase succeeded.
+    name: 'Garmin Personal API',
+    types: ['garmin_personal'],
+    sync: async (p) => {
+      await garminPersonalService.syncGarminPersonalData(
+        p.user_id,
+        'scheduled',
+        p.id
+      );
     },
   },
   {
