@@ -1,0 +1,23 @@
+{
+  "dailySleepDTO": {
+    "calendarDate": "2026-10-23",
+    "sleepTimeSeconds": 26400,
+    "sleepStartTimestampGMT": 1792708200000,
+    "sleepEndTimestampGMT": 1792736400000,
+    "sleepStartTimestampLocal": 1792693800000,
+    "deepSleepSeconds": 5400,
+    "lightSleepSeconds": 14400,
+    "remSleepSeconds": 6600,
+    "awakeSleepSeconds": 1800,
+    "averageSpO2Value": 94,
+    "lowestSpO2Value": 88,
+    "highestSpO2Value": 99,
+    "averageRespirationValue": 13,
+    "lowestRespirationValue": 10,
+    "highestRespirationValue": 17,
+    "awakeCount": 2,
+    "avgSleepStress": 18,
+    "sleepScores": { "overall": { "value": 82, "qualifierKey": "GOOD" } },
+    "sleepNeed": { "actual": 480 }
+  }
+}

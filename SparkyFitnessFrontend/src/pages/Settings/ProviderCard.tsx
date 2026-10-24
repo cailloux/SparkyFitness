@@ -51,6 +51,8 @@ import {
   useSyncHevyMutation,
   useSyncLiftosaurMutation,
   useDisconnectLiftosaurMutation,
+  useSyncGarminPersonalMutation,
+  useDisconnectGarminPersonalMutation,
   useConnectCorosMutation,
   useDisconnectCorosMutation,
   useManualSyncCorosMutation,
@@ -230,6 +232,14 @@ export const ProviderCard = ({
     mutate: handleDisconnectLiftosaur,
     isPending: isDisconnectLiftosaurPending,
   } = useDisconnectLiftosaurMutation();
+  const {
+    mutate: syncGarminPersonalData,
+    isPending: isSyncGarminPersonalPending,
+  } = useSyncGarminPersonalMutation();
+  const {
+    mutate: handleDisconnectGarminPersonal,
+    isPending: isDisconnectGarminPersonalPending,
+  } = useDisconnectGarminPersonalMutation();
 
   const [isSyncDialogOpen, setIsSyncDialogOpen] = useState(false);
 
@@ -302,6 +312,9 @@ export const ProviderCard = ({
           endDate,
         });
         break;
+      case 'garmin_personal':
+        syncGarminPersonalData({ providerId: provider.id, startDate, endDate });
+        break;
     }
   };
 
@@ -336,7 +349,9 @@ export const ProviderCard = ({
     isSyncCorosPending ||
     isSyncHevyPending ||
     isSyncLiftosaurPending ||
-    isDisconnectLiftosaurPending;
+    isDisconnectLiftosaurPending ||
+    isSyncGarminPersonalPending ||
+    isDisconnectGarminPersonalPending;
 
   const handleToggleActive = async (providerId: string, isActive: boolean) => {
     try {
@@ -413,7 +428,8 @@ export const ProviderCard = ({
       provider.garmin_connect_status === 'linked' ||
       provider.garmin_connect_status === 'connected' ||
       provider.hevy_connect_status === 'connected' ||
-      provider.liftosaur_connect_status === 'connected';
+      provider.liftosaur_connect_status === 'connected' ||
+      provider.garmin_personal_connect_status === 'connected';
 
     // Polar's is the only token expiry shown: the other OAuth providers refresh their
     // access tokens on their own, so their short expiry misleads users into reconnecting.
@@ -505,6 +521,15 @@ export const ProviderCard = ({
           disconnect: () => handleDisconnectLiftosaur(provider.id),
           sync: () => setIsSyncDialogOpen(true),
           lastSync: provider.liftosaur_last_sync_at,
+          tokenExpires: null,
+          hasToken: isLinked && provider.is_active,
+        };
+      case 'garmin_personal':
+        return {
+          connect: null,
+          disconnect: () => handleDisconnectGarminPersonal(provider.id),
+          sync: () => setIsSyncDialogOpen(true),
+          lastSync: provider.garmin_personal_last_sync_at,
           tokenExpires: null,
           hasToken: isLinked && provider.is_active,
         };
@@ -981,6 +1006,15 @@ export const ProviderCard = ({
         )}
       </div>
 
+      {provider.provider_type === 'garmin_personal' && (
+        <p className="text-xs text-muted-foreground mt-2">
+          {t(
+            'integrations.garminPersonalGarminNote',
+            'Garmin Connect is connected here, so the Personal API does not sync. Deactivate Garmin Connect to use the Personal API instead; both write the same Garmin data.'
+          )}
+        </p>
+      )}
+
       {[
         'fitbit',
         'oura',
@@ -988,6 +1022,7 @@ export const ProviderCard = ({
         'withings',
         'polar',
         'garmin',
+        'garmin_personal',
         'hevy',
         'liftosaur',
         'strava',

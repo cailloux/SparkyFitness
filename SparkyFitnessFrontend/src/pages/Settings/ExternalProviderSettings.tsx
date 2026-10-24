@@ -63,6 +63,8 @@ export interface ExternalDataProvider {
   hevy_connect_status?: 'connected' | 'disconnected';
   liftosaur_last_sync_at?: string | null;
   liftosaur_connect_status?: 'connected' | 'disconnected';
+  garmin_personal_last_sync_at?: string | null;
+  garmin_personal_connect_status?: 'connected' | 'disconnected';
   strava_last_sync_at?: string | null;
   strava_token_expires?: string | null;
   googlehealth_last_sync_at?: string | null;

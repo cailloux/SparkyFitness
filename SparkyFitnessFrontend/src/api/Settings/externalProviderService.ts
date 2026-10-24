@@ -614,6 +614,33 @@ const fetchHevyStatus = async (): Promise<HevyStatusResponse> => {
   return apiCall('/integrations/hevy/status');
 };
 
+const fetchGarminPersonalStatus = async (
+  providerId: string
+): Promise<{ connected: boolean; lastSyncAt: string | null }> => {
+  return apiCall(
+    `/integrations/garmin-personal/status?providerId=${encodeURIComponent(providerId)}`
+  );
+};
+
+export const handleDisconnectGarminPersonal = async (providerId?: string) => {
+  if (
+    !confirm(
+      'Are you sure you want to disconnect the Garmin Personal API? This will deactivate the integration until you re-enable it.'
+    )
+  )
+    return;
+
+  try {
+    await apiCall(`/integrations/garmin-personal/disconnect`, {
+      method: 'POST',
+      body: JSON.stringify({ providerId }),
+    });
+  } catch (error: unknown) {
+    console.error('Error disconnecting the Garmin Personal API:', error);
+    throw error;
+  }
+};
+
 export interface LiftosaurStatusResponse {
   connected: boolean;
   lastSyncAt: string | null;
@@ -725,6 +752,14 @@ export const getEnrichedProviders = async (): Promise<
             enriched.liftosaur_last_sync_at = status.lastSyncAt;
             break;
           }
+          case 'garmin_personal': {
+            const status = await fetchGarminPersonalStatus(provider.id);
+            enriched.garmin_personal_connect_status = status.connected
+              ? 'connected'
+              : 'disconnected';
+            enriched.garmin_personal_last_sync_at = status.lastSyncAt;
+            break;
+          }
           case 'strava': {
             if (provider.has_token) {
               const status = await fetchStravaStatus();
@@ -759,6 +794,9 @@ export const getEnrichedProviders = async (): Promise<
         }
         if (provider.provider_type === 'liftosaur') {
           enriched.liftosaur_connect_status = 'disconnected';
+        }
+        if (provider.provider_type === 'garmin_personal') {
+          enriched.garmin_personal_connect_status = 'disconnected';
         }
       }
 

@@ -1,0 +1,26 @@
+[
+  {
+    "activityId": 1000000001,
+    "activityName": "Zwift - Watopia",
+    "startTimeLocal": "2026-10-23 18:02:11",
+    "startTimeGMT": "2026-10-23 22:02:11",
+    "activityType": { "typeKey": "virtual_ride", "typeId": 152 },
+    "manufacturer": "ZWIFT",
+    "distance": 30500.5,
+    "duration": 3600.4,
+    "elapsedDuration": 3720.1,
+    "movingDuration": 3590,
+    "calories": 780,
+    "bmrCalories": 80,
+    "averageHR": 141,
+    "maxHR": 172
+  },
+  {
+    "activityId": 1000000002,
+    "startTimeLocal": "2026-10-23 07:15:00",
+    "activityType": { "typeKey": "strength_training", "typeId": 13 },
+    "duration": 1800,
+    "calories": 210,
+    "bmrCalories": 40
+  }
+]

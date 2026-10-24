@@ -1,6 +1,6 @@
 # AGENTS.md
 
-_Last updated: 2026-10-23_
+_Last updated: 2026-10-24_
 
 SparkyFitness Server is the backend API package for the SparkyFitness monorepo. Use this file as the primary guide for work inside `SparkyFitnessServer/`.
 
@@ -78,6 +78,7 @@ pnpm exec eslint routes/v2/foodRoutes.ts services/foodCoreService.ts
 - `routes/v2/heartRateZoneRoutes.ts` - the person's heart rate zone settings (`GET`/`PUT /api/v2/heart-rate-zones`; max and resting heart rate, `percent_max` / `heart_rate_reserve` / `custom` method, custom floors; `reset: true` restores defaults). Owner-only (`requireSelfActor`, also on reads). Logic in `services/heartRateZoneService.ts` over `models/heartRateZoneRepository.ts` (columns on `user_preferences`); `resolveZonesForUser(userId, observedMaxBpm?)` is what stored time in zone (`healthDataHandlers.persistWorkoutTelemetry`, `exerciseEntryService.attachWatchTelemetryToExerciseEntry`) and training load use. Zone maths is `../shared/src/utils/heartRateZones.ts`; the contract is `../shared/src/schemas/api/HeartRateZones.api.zod.ts`. Stored `exercise_entry_hr_zones` rows carry `zone_method` (`device` for Garmin) and are never recomputed when settings change.
 - `routes/v2/mindfulnessRoutes.ts` - mindfulness & meditation sessions tracking (`checkin` permission): day summaries (`/day-summary`), session logs and telemetry (`/entries`, `/entries/:id`). Logic lives in `models/mindfulnessRepository.ts`; the request/response contract is `../shared/src/schemas/api/Mindfulness.api.zod.ts`
 - `routes/v2/shoeRoutes.ts` - running-shoe inventory (`diary` permission): CRUD on `/api/v2/shoes` and `PUT /shoes/assignments/:exerciseEntryId` to link or unlink a diary entry (`exercise_entries.shoe_id`). Logic lives in `models/shoeRepository.ts`; mileage is `starting_distance_km` plus the sum of linked entries' `distance` (km); the contract is `../shared/src/schemas/api/Shoes.api.zod.ts`
+- `routes/garminPersonalRoutes.ts` - Garmin Connect Personal API provider (`/api/integrations/garmin-personal`: `sync`, `status`, `disconnect`; type `garmin_personal`, key in the encrypted `app_key`). `integrations/garminpersonal/garminPersonalApiClient.ts` exchanges the key for a 24 h JWT (cached in memory per key, refreshed 1 h before `exp`, one forced refresh on 401, backoff on 429/5xx, range chunking; errors are `GarminPersonalApiError`, which never carries the key or JWT). `garminPersonalMapping.ts` reshapes responses into the microservice's `healthData` records, and `garminPersonalService.ts` hands them to `services/garminService.ts` `syncGarminData` as a `GarminSyncSource`, so every Garmin processor is reused and rows land under source `garmin`. Activities are stored from their summary, then replaced by the downloaded FIT through `importFitBuffer` (`source: 'garmin'`, `sourceIdOverride` = Garmin activity id). The sync is skipped while a `garmin` provider is active
 - `routes/auth/` - auth-specific route fragments mounted through `routes/authRoutes.ts`
 - `services/` - business logic and orchestration
 - `models/` - PostgreSQL repositories and persistence helpers
@@ -228,8 +229,8 @@ When searching, ignore noisy/generated directories unless you explicitly need th
 ### Integrations and Background Work
 
 - Provider-specific adapters live under `integrations/`; coordinating logic usually lives in `services/` and persistence in `models/`
-- Current adapters span food/nutrition (OpenFoodFacts, FatSecret, Nutritionix, USDA, Mealie, Tandoor, Norish, SwissFood, Yazio), fitness devices (Garmin Connect sync plus FIT file import via `integrations/garminfit/` + `services/fitImportService.ts`, Withings, Fitbit, Oura, Polar, Strava, COROS, Hevy), exercise databases (Wger, FreeExerciseDB), and health-data import (Google Health, generic/mobile health data)
-- Scheduled jobs currently include backups, session cleanup, and hourly sync loops for Withings, Garmin, Fitbit, Oura, Polar, Strava, and COROS
+- Current adapters span food/nutrition (OpenFoodFacts, FatSecret, Nutritionix, USDA, Mealie, Tandoor, Norish, SwissFood, Yazio), fitness devices (Garmin Connect sync, the official Garmin Connect Personal API, plus FIT file import via `integrations/garminfit/` + `services/fitImportService.ts`, Withings, Fitbit, Oura, Polar, Strava, COROS, Hevy), exercise databases (Wger, FreeExerciseDB), and health-data import (Google Health, generic/mobile health data)
+- Scheduled jobs currently include backups, session cleanup, and hourly sync loops for Withings, Garmin, Garmin Personal API, Fitbit, Oura, Polar, Strava, and COROS
 - Integration work often spans route, service, repository, cron, and external-provider settings code; inspect the whole path before calling the work complete
 - **OAuth linking (`/authorize`, `/callback`) is self-only, and `state` is a server-issued single-use nonce.** Never derive a user id from a callback request body, and never gate an authorize route with `checkPermissionMiddleware('diary')` — on GET that resolves to `diary_read`, which would hand a read-only delegate the owner's decrypted OAuth client id. Use `requireSelfActor` plus `utils/oauthState.ts`. Withings and Polar follow this pattern; Oura, Fitbit and Strava are self-only but still send `state = userId` and ignore it on callback (tracked follow-up)
 

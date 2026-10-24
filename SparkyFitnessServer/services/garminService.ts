@@ -7,6 +7,32 @@ import { todayInZone, addDays } from '@workspace/shared';
 import measurementService from './measurementService.js';
 import type { GarminSyncResult } from './garminSyncResult.js';
 
+type GarminHealthData = Record<string, Array<Record<string, unknown>>>;
+
+/**
+ * Where a Garmin sync reads its data from. The microservice (garminconnect)
+ * and the official Personal API return the same Garmin DTOs, reshaped into the
+ * same health/nutrition records, so both feed the same processors below.
+ */
+export interface GarminSyncSource {
+  fetchHealth: (
+    userId: string,
+    startDate: string,
+    endDate: string
+  ) => Promise<GarminHealthData>;
+  syncActivities: (
+    userId: string,
+    startDate: string,
+    endDate: string,
+    timezone: string
+  ) => Promise<{ processedEntries: number }>;
+  fetchNutrition: (
+    userId: string,
+    startDate: string,
+    endDate: string
+  ) => Promise<Array<Record<string, unknown>>>;
+}
+
 import {
   mapGarminExerciseCategory,
   formatExerciseName,
@@ -31,7 +57,7 @@ import {
  */
 async function processHealthChunk(
   userId: string,
-  healthData: Record<string, Array<Record<string, unknown>>>,
+  healthData: GarminHealthData,
   startDate: string,
   endDate: string
 ) {
@@ -77,6 +103,38 @@ async function processHealthChunk(
   };
 }
 
+const garminConnectSource: GarminSyncSource = {
+  fetchHealth: async (userId, startDate, endDate) =>
+    (
+      await garminConnectService.fetchGarminHealthAndWellnessChunk(
+        userId,
+        startDate,
+        endDate,
+        []
+      )
+    ).data,
+  syncActivities: async (userId, startDate, endDate, timezone) =>
+    processActivitiesAndWorkouts(
+      userId,
+      await garminConnectService.fetchGarminActivitiesAndWorkoutsChunk(
+        userId,
+        startDate,
+        endDate
+      ),
+      startDate,
+      endDate,
+      timezone
+    ),
+  fetchNutrition: async (userId, startDate, endDate) =>
+    (
+      await garminConnectService.fetchGarminNutritionDiaryChunk(
+        userId,
+        startDate,
+        endDate
+      )
+    ).nutrition_data,
+};
+
 /**
  * Main orchestrator for syncing all Garmin telemetry and health data streams for a given user.
  * Processes and persists data incrementally chunk-by-chunk to prevent memory bloating, socket timeouts,
@@ -88,7 +146,8 @@ async function syncGarminData(
   customStartDate: string | null = null,
   customEndDate: string | null = null,
   dataSource?: string,
-  saveMockData?: boolean
+  saveMockData?: boolean,
+  source: GarminSyncSource = garminConnectSource
 ) {
   setMockDataContext({ dataSource, saveMockData });
   let startDate: string, endDate: string;
@@ -146,16 +205,14 @@ async function syncGarminData(
 
     // Phase 1: Health and Wellness for this chunk
     try {
-      const healthData =
-        await garminConnectService.fetchGarminHealthAndWellnessChunk(
-          userId,
-          chunk.start,
-          chunk.end,
-          []
-        );
+      const healthData = await source.fetchHealth(
+        userId,
+        chunk.start,
+        chunk.end
+      );
       const healthChunkResult = await processHealthChunk(
         userId,
-        healthData.data,
+        healthData,
         chunk.start,
         chunk.end
       );
@@ -176,15 +233,8 @@ async function syncGarminData(
 
     // Phase 2: Activities and Workouts for this chunk
     try {
-      const activitiesData =
-        await garminConnectService.fetchGarminActivitiesAndWorkoutsChunk(
-          userId,
-          chunk.start,
-          chunk.end
-        );
-      const actResult = await processActivitiesAndWorkouts(
+      const actResult = await source.syncActivities(
         userId,
-        activitiesData,
         chunk.start,
         chunk.end,
         tz
@@ -205,15 +255,14 @@ async function syncGarminData(
 
     // Phase 3: Nutrition Diary for this chunk
     try {
-      const nutritionData =
-        await garminConnectService.fetchGarminNutritionDiaryChunk(
-          userId,
-          chunk.start,
-          chunk.end
-        );
+      const nutritionData = await source.fetchNutrition(
+        userId,
+        chunk.start,
+        chunk.end
+      );
       const nutrResult = await processGarminNutritionData(
         userId,
-        nutritionData.nutrition_data,
+        nutritionData,
         chunk.start,
         chunk.end
       );

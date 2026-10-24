@@ -78,6 +78,24 @@ export const syncHevyData = async (
   });
 };
 
+export interface GarminPersonalSyncResult {
+  skipped?: 'garmin_connect_active';
+  health?: Record<string, unknown> | null;
+  activities?: { processedEntries?: number; error?: string } | null;
+  nutrition?: Record<string, unknown> | null;
+}
+
+export const syncGarminPersonalData = async (
+  providerId?: string,
+  startDate?: string,
+  endDate?: string
+): Promise<GarminPersonalSyncResult> => {
+  return apiCall('/integrations/garmin-personal/sync', {
+    method: 'POST',
+    body: JSON.stringify({ providerId, startDate, endDate }),
+  });
+};
+
 export interface LiftosaurSyncResult {
   message?: string;
   workoutsImported?: number;

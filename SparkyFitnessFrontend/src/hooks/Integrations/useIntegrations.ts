@@ -9,6 +9,8 @@ import {
   syncHevyData,
   syncLiftosaurData,
   LiftosaurSyncResult,
+  syncGarminPersonalData,
+  GarminPersonalSyncResult,
   loginGarmin,
   GarminLoginPayload,
 } from '@/api/Integrations/integrations';
@@ -41,6 +43,7 @@ import {
   handleDisconnectStrava,
   handleManualSyncStrava,
   handleDisconnectLiftosaur,
+  handleDisconnectGarminPersonal,
   fetchGarminStatus,
   GarminMfaPayload,
   resumeGarminLogin,
@@ -288,6 +291,78 @@ export const useDisconnectLiftosaurMutation = () => {
 
   return useMutation({
     mutationFn: (providerId?: string) => handleDisconnectLiftosaur(providerId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: externalProviderKeys.lists(),
+      });
+    },
+  });
+};
+
+interface SyncGarminPersonalVariables {
+  providerId?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export const useSyncGarminPersonalMutation = () => {
+  const { t } = useTranslation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const invalidateDiary = useDiaryInvalidation();
+
+  return useMutation({
+    mutationFn: ({
+      providerId,
+      startDate,
+      endDate,
+    }: SyncGarminPersonalVariables) =>
+      syncGarminPersonalData(providerId, startDate, endDate),
+    onSuccess: (data: GarminPersonalSyncResult) => {
+      queryClient.invalidateQueries({
+        queryKey: externalProviderKeys.lists(),
+      });
+      if (data?.skipped) {
+        toast({
+          title: t(
+            'integrations.garminPersonalSyncSkippedTitle',
+            'Garmin Personal API sync skipped'
+          ),
+          description: t(
+            'integrations.garminPersonalGarminNote',
+            'Garmin Connect is connected here, so the Personal API does not sync. Deactivate Garmin Connect to use the Personal API instead; both write the same Garmin data.'
+          ),
+        });
+        return;
+      }
+      invalidateDiary();
+      toast({
+        title: t(
+          'integrations.garminPersonalSyncSuccessTitle',
+          'Garmin Personal API synced successfully'
+        ),
+        description: t(
+          'integrations.garminPersonalSyncDetails',
+          'Synced: {{activities}} activities.',
+          { activities: data?.activities?.processedEntries ?? 0 }
+        ),
+      });
+    },
+    meta: {
+      errorMessage: t(
+        'integrations.garminPersonalSyncError',
+        'Garmin Personal API sync failed. Please check your API key in settings.'
+      ),
+    },
+  });
+};
+
+export const useDisconnectGarminPersonalMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (providerId?: string) =>
+      handleDisconnectGarminPersonal(providerId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: externalProviderKeys.lists(),
