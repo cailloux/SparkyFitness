@@ -651,7 +651,13 @@ export const handleDisconnectLiftosaur = async (providerId?: string) => {
 
 const fetchIntervalsStatus = async (
   providerId: string
-): Promise<{ connected: boolean; lastSyncAt: string | null }> => {
+): Promise<{
+  connected: boolean;
+  lastSyncAt: string | null;
+  pushNutrition: boolean;
+  pushedDays: number;
+  pushedSince: string | null;
+}> => {
   return apiCall(
     `/integrations/intervals/status?providerId=${encodeURIComponent(providerId)}`
   );
@@ -762,6 +768,9 @@ export const getEnrichedProviders = async (): Promise<
               ? 'connected'
               : 'disconnected';
             enriched.intervals_last_sync_at = status.lastSyncAt;
+            enriched.intervals_push_nutrition = status.pushNutrition;
+            enriched.intervals_pushed_days = status.pushedDays;
+            enriched.intervals_pushed_since = status.pushedSince;
             break;
           }
           case 'strava': {

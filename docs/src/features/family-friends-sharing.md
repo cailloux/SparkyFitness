@@ -56,6 +56,7 @@ Certain tables contain private user data that is **never** accessible to any fam
 * Running goals (`run_goals` table): your weekly running distance target and the race you are counting down to. Like the run program, they are personal and never shared or delegated.
 * Your own run plans (`custom_run_programs` table): plans you wrote yourself, with their names and workouts. They are personal, so they are never shared or delegated.
 * Running fitness tests (`fitness_tests` table): your 5K time trials, 30-minute runs and Cooper tests (outdoors or on a treadmill), their results and the training paces each one gave. They are personal training data, so they are never shared or delegated, and they are not available while you act on behalf of someone else.
+* Intervals.icu nutrition push log (`intervals_nutrition_pushes` table): the daily calorie and macro totals SparkyFitness last wrote to your Intervals.icu account. It belongs to your Intervals.icu connection, so it is never shared or delegated, and only you can turn pushing on or off or remove the pushed data.
 * Your saved routes (`routes` table): routes you drew, imported or saved from a workout, with their points and turn cues. They are personal, so they are never shared or delegated.
 
 ### 2. Tier 2: Read-Only Profile & Settings Data

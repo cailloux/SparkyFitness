@@ -225,6 +225,7 @@ export * from './schemas/database/UserFastingPreferences.zod.ts';
 export * from './schemas/database/MindfulnessSessions.zod.ts';
 export * from './schemas/database/RunPrograms.zod.ts';
 export * from './schemas/database/RunGoals.zod.ts';
+export * from './schemas/database/IntervalsNutritionPushes.zod.ts';
 export * from './schemas/database/Shoes.zod.ts';
 export * from './schemas/database/CustomRunPrograms.zod.ts';
 export * from './schemas/database/FitnessTests.zod.ts';
